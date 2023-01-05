@@ -1,32 +1,36 @@
 import "./style.css";
-import javascriptLogo from "./javascript.svg";
-import { setupCounter } from "./counter.js";
 import Matter from "matter-js";
+
 // module aliases
 var Engine = Matter.Engine,
-  Render = Matter.Render,
-  Runner = Matter.Runner,
-  Bodies = Matter.Bodies,
-  Composite = Matter.Composite;
+    Render = Matter.Render,
+    Runner = Matter.Runner,
+    Bodies = Matter.Bodies,
+    Composite = Matter.Composite;
 
 // create an engine
 var engine = Engine.create();
-var PAD_SPEED = 75;
-let ball;
-
 engine.world.gravity.y = 0;
+
+let ball;
+const PAD_SPEED = 20;
+const GAME_HEIGHT = 650;
+const GAME_WIDTH = 800;
+const BALL_RADIUS = 15;
+const WALL_THICKNESS = 20
+
 // create a renderer
 var render = Render.create({
   element: document.body,
   engine: engine,
   options: {
-    width: 810,
-    height: 800,
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT,
     pixelRatio: 1,
-    wireframeBackground: "#000000",
+    background: "black",
     hasBounds: true,
     enabled: true,
-    wireframes: true,
+    wireframes: false,
     showSleeping: true,
     showDebug: false,
     showBroadphase: false,
@@ -45,16 +49,42 @@ var render = Render.create({
     showMousePosition: false,
   },
 });
-// create two boxes and a ground
 
-var paddleL = Bodies.rectangle(0, 200, 20, 160, { isStatic: true });
-var paddleR = Bodies.rectangle(810, 200, 20, 160, { isStatic: true });
-
-var wallT = Bodies.rectangle(0, 0, 8000, 50, {
+// create 2 paddles
+var paddleL = Bodies.rectangle(20, GAME_HEIGHT / 2, 20, 160, { 
   isStatic: true,
-  label: "wallT",
+  label: "PaddleLeft",
+  render: {
+    fillStyle: "white"
+  }
 });
-var wallB = Bodies.rectangle(0, 800, 8000, 50, { isStatic: true });
+var paddleR = Bodies.rectangle(780, GAME_HEIGHT / 2, 20, 160, { 
+  isStatic: true,
+  label: "PaddleRight",
+  render: {
+    fillStyle: "white"
+  }
+});
+
+// create a top and bottom walls
+var wallT = Bodies.rectangle(0, 0, GAME_WIDTH * 2, WALL_THICKNESS, {
+  isStatic: true,
+  label: "WallT",
+  render: {
+    fillStyle: "black",
+    strokeStyle: 'red',
+    lineWidth: 5
+  }
+});
+var wallB = Bodies.rectangle(0, GAME_HEIGHT, GAME_WIDTH * 2, WALL_THICKNESS, { 
+  isStatic: true, 
+  label: "WallB",
+  render: {
+    fillStyle: "black",
+    strokeStyle: 'red',
+    lineWidth: 5
+  }
+});
 
 // add all of the bodies to the world
 Composite.add(engine.world, [paddleL, paddleR, wallT, wallB]);
@@ -70,27 +100,62 @@ Runner.run(runner, engine);
 
 setInterval(function () {
   Engine.update(engine, 1000 / 60);
-  Matter.Events.on(engine, "collisionStart", (e) => {
-    console.log(e.pairs[0]);
-    //console.log("mathieu");
-  });
-  //console.log(ball.position.x + " - " + ball.position.y);
-  if (ball != undefined)
-    if (ball.position.y > 720 || ball.position.y < 80) {
-      console.log("wall hit");
-      let rejectForce = -(ball.velocity.y * 0.05);
-      //console.log(rejectForce);
-      if (rejectForce > 1) rejectForce = 1;
-      Matter.Body.applyForce(
-        ball,
-        { x: ball.position.x, y: ball.position.y },
-        { x: 0, y: rejectForce }
-      );
-    }
+  if (ball != undefined) {
+    Matter.Events.on(engine, "collisionStart", (e) => {
+      const pairs = e.pairs
+      const objA = pairs[0].bodyA.label
+      const objB = pairs[0].bodyB.label
+      if (objB === 'Ball' && (objA === 'WallB' || objA === 'WallT')) {
+        setTimeout(() => {
+          let velocity = ball.velocity.y
+          if (Math.abs(velocity) < 1)
+            velocity = velocity + Math.sign(velocity)
+          Matter.Body.setVelocity(ball, { x: ball.velocity.x, y: velocity })
+        }, 1000 / 60)
+      }
+      if (objB === 'Ball' && (objA === 'PaddleRight' || objA === 'PaddleLeft')) {
+        setTimeout(() => {
+          let velocity = ball.velocity.y
+          if (Math.abs(velocity) < 1)
+            velocity = velocity + Math.sign(velocity)
+          Matter.Body.setVelocity(ball, { x: ball.velocity.x, y: velocity })
+        }, 1000 / 60)
+      }
+    });
+    if (ball.position.x < 0 || ball.position.x > 800)
+      spawnBall();
+  }
 }, 1000 / 60);
 
+function randomNumberInterval(min, max) { 
+  let x = Math.floor(Math.random() * (max - min) + min);
+  if (x == 0)
+    return randomNumberInterval(min, max);
+  return x;
+}
+
+function spawnBall() {
+  var b = Bodies.circle(200, 200, BALL_RADIUS, {
+    label: "Ball",
+    render : {
+      fillStyle: "white"
+    }
+  });
+  b.restitution = 1.08;
+  b.inertia = Infinity;
+  b.friction = 0;
+  b.frictionAir = 0;
+  b.frictionStatic = 0;
+  let starter = randomNumberInterval(1, 3)
+  starter == 1 ? starter = 1 : starter = -1;
+  Matter.Body.setPosition(b, {x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2,});
+  Matter.Body.setVelocity(b, { x: 3 * starter, y: randomNumberInterval(-4, 5) })
+  Composite.add(engine.world, [b]);
+  ball = b;
+}
+
 document.body.addEventListener("keydown", (e) => {
-  if (e.keyCode == "40") {
+  /*if (e.keyCode == "40") {
     Matter.Body.setPosition(paddleR, {
       x: paddleR.position.x,
       y: paddleR.position.y + PAD_SPEED,
@@ -116,25 +181,8 @@ document.body.addEventListener("keydown", (e) => {
       x: paddleL.position.x,
       y: paddleL.position.y - PAD_SPEED,
     });
-  }
+  }*/
   if (e.keyCode == "32") {
-    console.log("game start");
-    var b = Bodies.circle(200, 200, 40, 40);
-    b.restitution = 1.1;
-    b.inertia = Infinity;
-    b.friction = 0;
-    b.frictionAir = 0;
-    b.frictionStatic = 0;
-    Matter.Body.setPosition(b, {
-      x: 500,
-      y: 500,
-    });
-    Matter.Body.applyForce(
-      b,
-      { x: b.position.x, y: b.position.y },
-      { x: -0.05, y: 0.01 }
-    );
-    Composite.add(engine.world, [b]);
-    ball = b;
+    spawnBall();
   }
 });
