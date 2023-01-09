@@ -15,7 +15,7 @@ engine.world.gravity.y = 0;
 let ball;
 const PAD_SPEED = 12;
 const GAME_HEIGHT = 650;
-const GAME_WIDTH = 800;
+const GAME_WIDTH = 1000;
 const BALL_RADIUS = 15;
 const WALL_THICKNESS = 20
 
@@ -58,7 +58,7 @@ var paddleL = Bodies.rectangle(20, GAME_HEIGHT / 2, 20, 160, {
     fillStyle: "white"
   }
 });
-var paddleR = Bodies.rectangle(780, GAME_HEIGHT / 2, 20, 160, { 
+var paddleR = Bodies.rectangle(GAME_WIDTH - 20, GAME_HEIGHT / 2, 20, 160, { 
   isStatic: true,
   label: "PaddleRight",
   render: {
@@ -98,6 +98,8 @@ var runner = Runner.create();
 // run the engine
 Runner.run(runner, engine);
 
+spawnBall();
+
 setInterval(function () {
   updateMovePaddle();
   if (ball != undefined) {
@@ -122,8 +124,10 @@ setInterval(function () {
         }, 1000 / 120)
       }
     });
-    if (ball.position.x < 0 || ball.position.x > 800)
-      spawnBall();
+    if (ball.position.x < 0 || ball.position.x > GAME_WIDTH) {
+      updateScore(ball.position);
+      resetBall(ball)
+    }
     Engine.update(engine, 1000 / 120);
   }
 }, 1000 / 60);
@@ -133,6 +137,12 @@ function randomNumberInterval(min, max) {
   if (x == 0)
     return randomNumberInterval(min, max);
   return x;
+}
+
+function launchBall(ball) {
+  let starter = randomNumberInterval(1, 3)
+  starter == 1 ? starter = 1 : starter = -1;
+  Matter.Body.setVelocity(ball, { x: 3 * starter, y: randomNumberInterval(-4, 5) })
 }
 
 function spawnBall() {
@@ -153,6 +163,11 @@ function spawnBall() {
   Matter.Body.setVelocity(b, { x: 3 * starter, y: randomNumberInterval(-4, 5) })
   Composite.add(engine.world, [b]);
   ball = b;
+}
+
+function resetBall() {
+  Matter.Body.setPosition(ball, {x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2,});
+  Matter.Body.setVelocity(ball, { x: 0, y:0 })
 }
 
 var keys = [];
@@ -193,6 +208,19 @@ function updateMovePaddle() {
 
 document.body.addEventListener("keydown", (e) => {
   if (e.keyCode == "32") {
-    spawnBall();
+    launchBall(ball);
   }
 });
+
+////////SCORE GESTION////////
+
+var currentScoreLeft = 0;
+var currentScoreRight = 0;
+
+function updateScore(ball) {
+  console.log(ball);
+  if (ball.x >= GAME_WIDTH)
+    document.getElementById('score left span').innerHTML = ++currentScoreLeft;
+  else if (ball.x <= 0)
+    document.getElementById('score right span').innerHTML = ++currentScoreRight;
+}
