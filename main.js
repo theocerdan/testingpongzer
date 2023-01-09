@@ -64,6 +64,7 @@ Render.run(render);
 let ball;
 var currentScoreLeft = 0;
 var currentScoreRight = 0;
+var scorer = 1;
 var keys = [];
 
 /// CREATION OF ALL BODIES ///
@@ -158,17 +159,13 @@ function initBall() {
   b.friction = 0;
   b.frictionAir = 0;
   b.frictionStatic = 0;
-  let starter = randomNumberInterval(1, 3)
-  starter == 1 ? starter = 1 : starter = -1;
   Matter.Body.setPosition(b, {x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2,});
   Composite.add(engine.world, [b]);
   ball = b;
 }
 
 function launchBall() {
-  let starter = randomNumberInterval(1, 3)
-  starter == 1 ? starter = 1 : starter = -1;
-  Matter.Body.setVelocity(ball, { x: 3 * starter, y: randomNumberInterval(-4, 5) })
+  Matter.Body.setVelocity(ball, { x: 3 * scorer, y: randomNumberInterval(0, 5) })
 }
 
 function resetBall() {
@@ -208,6 +205,10 @@ document.body.addEventListener("keydown", (e) => {
 /// SCORE GESTION ///
 
 function gestionScore() {
+  if (ball.position.x < 0)
+    scorer = -1;
+  else if (ball.position.x > GAME_WIDTH)
+    scorer = 1;
   if (ball.position.x < 0 || ball.position.x > GAME_WIDTH) {
     updateScore();
     resetBall()
