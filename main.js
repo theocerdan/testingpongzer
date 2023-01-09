@@ -15,9 +15,10 @@ engine.world.gravity.y = 0;
 let ball;
 const PAD_SPEED = 12;
 const GAME_HEIGHT = 650;
-const GAME_WIDTH = 1000;
+const GAME_WIDTH = 850;
 const BALL_RADIUS = 15;
-const WALL_THICKNESS = 20
+const WALL_THICKNESS = 20;
+const PADDLE_LENGHT = 150;
 
 // create a renderer
 var render = Render.create({
@@ -51,14 +52,14 @@ var render = Render.create({
 });
 
 // create 2 paddles
-var paddleL = Bodies.rectangle(20, GAME_HEIGHT / 2, 20, 160, { 
+var paddleL = Bodies.rectangle(20, GAME_HEIGHT / 2, 20, PADDLE_LENGHT, { 
   isStatic: true,
   label: "PaddleLeft",
   render: {
     fillStyle: "white"
   }
 });
-var paddleR = Bodies.rectangle(GAME_WIDTH - 20, GAME_HEIGHT / 2, 20, 160, { 
+var paddleR = Bodies.rectangle(GAME_WIDTH - 20, GAME_HEIGHT / 2, 20, PADDLE_LENGHT, { 
   isStatic: true,
   label: "PaddleRight",
   render: {
@@ -72,8 +73,6 @@ var wallT = Bodies.rectangle(0, 0, GAME_WIDTH * 2, WALL_THICKNESS, {
   label: "WallT",
   render: {
     fillStyle: "black",
-    strokeStyle: 'red',
-    lineWidth: 5
   }
 });
 var wallB = Bodies.rectangle(0, GAME_HEIGHT, GAME_WIDTH * 2, WALL_THICKNESS, { 
@@ -81,8 +80,6 @@ var wallB = Bodies.rectangle(0, GAME_HEIGHT, GAME_WIDTH * 2, WALL_THICKNESS, {
   label: "WallB",
   render: {
     fillStyle: "black",
-    strokeStyle: 'red',
-    lineWidth: 5
   }
 });
 
@@ -160,7 +157,6 @@ function spawnBall() {
   let starter = randomNumberInterval(1, 3)
   starter == 1 ? starter = 1 : starter = -1;
   Matter.Body.setPosition(b, {x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2,});
-  Matter.Body.setVelocity(b, { x: 3 * starter, y: randomNumberInterval(-4, 5) })
   Composite.add(engine.world, [b]);
   ball = b;
 }
@@ -180,36 +176,23 @@ document.body.addEventListener("keyup", function (e) {
 })
 
 function updateMovePaddle() {
-  if (keys[38]) {
-    Matter.Body.translate(paddleR, {
-      x: 0,
-      y: -PAD_SPEED,
-    });
-  }
-  if (keys[40]) {
-    Matter.Body.translate(paddleR, {
-      x: 0,
-      y: PAD_SPEED,
-    });
-  }
-  if (keys[65]) {
-    Matter.Body.translate(paddleL, {
-      x: 0,
-      y: PAD_SPEED,
-    });
-  }
-  if (keys[81]) {
-    Matter.Body.translate(paddleL, {
-      x: 0,
-      y: -PAD_SPEED,
-    });
-  }
+  if (keys[38])
+    if (paddleR.position.y > 80)
+      Matter.Body.translate(paddleR, { x: 0, y: -PAD_SPEED});
+  if (keys[40])
+    if (paddleR.position.y < (GAME_HEIGHT - (PADDLE_LENGHT / 2)))
+      Matter.Body.translate(paddleR, { x: 0, y: PAD_SPEED });
+  if (keys[65])
+    if (paddleL.position.y < (GAME_HEIGHT - (PADDLE_LENGHT / 2)))
+      Matter.Body.translate(paddleL, { x: 0, y: PAD_SPEED });
+  if (keys[81])
+    if (paddleL.position.y > 80)
+      Matter.Body.translate(paddleL, { x: 0, y: -PAD_SPEED });
 }
 
 document.body.addEventListener("keydown", (e) => {
-  if (e.keyCode == "32") {
+  if (e.keyCode == "32" && (ball.velocity.x == 0 && ball.velocity.y == 0))
     launchBall(ball);
-  }
 });
 
 ////////SCORE GESTION////////
