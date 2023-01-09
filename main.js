@@ -13,7 +13,7 @@ var engine = Engine.create();
 engine.world.gravity.y = 0;
 
 let ball;
-const PAD_SPEED = 20;
+const PAD_SPEED = 12;
 const GAME_HEIGHT = 650;
 const GAME_WIDTH = 800;
 const BALL_RADIUS = 15;
@@ -21,7 +21,7 @@ const WALL_THICKNESS = 20
 
 // create a renderer
 var render = Render.create({
-  element: document.body,
+  element: document.querySelector("#gameBoard"),
   engine: engine,
   options: {
     width: GAME_WIDTH,
@@ -99,7 +99,7 @@ var runner = Runner.create();
 Runner.run(runner, engine);
 
 setInterval(function () {
-  Engine.update(engine, 1000 / 60);
+  updateMovePaddle();
   if (ball != undefined) {
     Matter.Events.on(engine, "collisionStart", (e) => {
       const pairs = e.pairs
@@ -119,11 +119,12 @@ setInterval(function () {
           if (Math.abs(velocity) < 1)
             velocity = velocity + Math.sign(velocity)
           Matter.Body.setVelocity(ball, { x: ball.velocity.x, y: velocity })
-        }, 1000 / 60)
+        }, 1000 / 120)
       }
     });
     if (ball.position.x < 0 || ball.position.x > 800)
       spawnBall();
+    Engine.update(engine, 1000 / 120);
   }
 }, 1000 / 60);
 
@@ -154,34 +155,43 @@ function spawnBall() {
   ball = b;
 }
 
+var keys = [];
+
+document.body.addEventListener("keydown", function (e) {
+  keys[e.keyCode] = true;
+})
+document.body.addEventListener("keyup", function (e) {
+  keys[e.keyCode] = false;
+})
+
+function updateMovePaddle() {
+  if (keys[38]) {
+    Matter.Body.translate(paddleR, {
+      x: 0,
+      y: -PAD_SPEED,
+    });
+  }
+  if (keys[40]) {
+    Matter.Body.translate(paddleR, {
+      x: 0,
+      y: PAD_SPEED,
+    });
+  }
+  if (keys[65]) {
+    Matter.Body.translate(paddleL, {
+      x: 0,
+      y: PAD_SPEED,
+    });
+  }
+  if (keys[81]) {
+    Matter.Body.translate(paddleL, {
+      x: 0,
+      y: -PAD_SPEED,
+    });
+  }
+}
+
 document.body.addEventListener("keydown", (e) => {
-  /*if (e.keyCode == "40") {
-    Matter.Body.setPosition(paddleR, {
-      x: paddleR.position.x,
-      y: paddleR.position.y + PAD_SPEED,
-    });
-  }
-
-  if (e.keyCode == "38") {
-    Matter.Body.setPosition(paddleR, {
-      x: paddleR.position.x,
-      y: paddleR.position.y - PAD_SPEED,
-    });
-  }
-
-  if (e.keyCode == "65") {
-    Matter.Body.setPosition(paddleL, {
-      x: paddleL.position.x,
-      y: paddleL.position.y + PAD_SPEED,
-    });
-  }
-
-  if (e.keyCode == "81") {
-    Matter.Body.setPosition(paddleL, {
-      x: paddleL.position.x,
-      y: paddleL.position.y - PAD_SPEED,
-    });
-  }*/
   if (e.keyCode == "32") {
     spawnBall();
   }
