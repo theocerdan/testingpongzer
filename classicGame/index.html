@@ -2,14 +2,29 @@
 <html lang="en">
   <body>
     <div class="app">
-      <div id="gameBoard"></div>
-      <div class="score left">
-        Score<br><span id="score left span">0</span>
-      </div>
-      <div class="score right">
-        Score<br><span id="score right span">0</span>
+      <div id="gameBoard">
+        <div class="score left">
+          Score<br><span id="score left span">0</span>
+        </div>
+        <div class="score right">
+          Score<br><span id="score right span">0</span>
+        </div>
       </div>
     </div>
-    <script type="module" src="/main.js"></script>
-  </body>
+    <button id="hardcoreBtn" style="position:fixed; right:200px; text-align: center;" onclick="onbuttonclick()">OFF</button>
+    <script type="module" src="main.js"></script>
+    <script>
+      function launchHardcore() {
+        if (document.getElementById("hardcoreBtn").innerHTML == "ON") {
+          document.getElementById('score left span').innerHTML = 0;
+          document.getElementById('score right span').innerHTML = 0;
+          document.getElementById("hardcoreBtn").innerHTML = "OFF"
+        } else if (document.getElementById("hardcoreBtn").innerHTML == "OFF") {
+          document.getElementById('score left span').innerHTML = 0;
+          document.getElementById('score right span').innerHTML = 0;
+          document.getElementById("hardcoreBtn").innerHTML = "ON"
+        }
+      }
+    </script>
+  </body> 
 </html>

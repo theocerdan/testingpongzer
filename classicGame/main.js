@@ -21,7 +21,7 @@ const GAME_HEIGHT = 650;
 const GAME_WIDTH = 850;
 const BALL_RADIUS = 15;
 const WALL_THICKNESS = 20;
-const PADDLE_LENGHT = 150;
+var PADDLE_HEIGHT = 150;
 
 /// RENDERER CREATION ///
 
@@ -69,33 +69,35 @@ var keys = [];
 
 /// CREATION OF ALL BODIES ///
 
-var paddleL = Bodies.rectangle(20, GAME_HEIGHT / 2, 20, PADDLE_LENGHT, { 
+var paddleL = Bodies.rectangle(20, GAME_HEIGHT / 2, 20, PADDLE_HEIGHT, { 
   isStatic: true,
   label: "PaddleLeft",
   render: {
-    fillStyle: "white"
-  }
+    fillStyle: "black"
+  },
+  height: PADDLE_HEIGHT,
 });
-var paddleR = Bodies.rectangle(GAME_WIDTH - 20, GAME_HEIGHT / 2, 20, PADDLE_LENGHT, { 
+var paddleR = Bodies.rectangle(GAME_WIDTH - 20, GAME_HEIGHT / 2, 20, PADDLE_HEIGHT, { 
   isStatic: true,
   label: "PaddleRight",
   render: {
-    fillStyle: "white",
-  }
+    fillStyle: "black",
+  },
+  height: PADDLE_HEIGHT,
 });
 var wallT = Bodies.rectangle(0, 0, GAME_WIDTH * 2, WALL_THICKNESS, {
   isStatic: true,
   label: "WallT",
   render: {
-    fillStyle: "black",
+    fillStyle: "white",
   }
 });
 var wallB = Bodies.rectangle(0, GAME_HEIGHT, GAME_WIDTH * 2, WALL_THICKNESS, { 
   isStatic: true, 
   label: "WallB",
   render: {
-    fillStyle: "black",
-  }
+    fillStyle: "white",
+  }, 
 });
 
 /// ADD BODIES TO THE WORLD ///
@@ -112,6 +114,7 @@ initBall();
 /// GAME LOOP ///
 
 setInterval(function () {
+  updateColorMode();
   updateMovePaddle();
   if (ball != undefined) {
     gestionBallVelocity();
@@ -120,6 +123,26 @@ setInterval(function () {
     Engine.update(engine, 1000 / 120);
   }
 }, 1000 / 60);
+
+function updateColorMode() {
+  if (document.getElementById("hardcoreBtn").innerHTML == "ON") {
+    document.querySelector('body').style.color = "black"
+    paddleL.render.fillStyle = "black"
+    paddleR.render.fillStyle = "black"
+    ball.render.fillStyle = "black"
+    wallB.render.fillStyle = "white"
+    wallT.render.fillStyle = "white"
+    render.options.background = "white"
+  } else {
+    document.querySelector('body').style.color = "white"
+    paddleL.render.fillStyle = "white"
+    paddleR.render.fillStyle = "white"
+    ball.render.fillStyle = "white"
+    wallB.render.fillStyle = "black"
+    wallT.render.fillStyle = "black"
+    render.options.background = "black"
+  }
+}
 
 /// COLLISION FUNCTIONS ///
 
@@ -153,7 +176,7 @@ function initBall() {
   var b = Bodies.circle(200, 200, BALL_RADIUS, {
     label: "Ball",
     render : {
-      fillStyle: "white"
+      fillStyle: "black"
     }
   });
   b.restitution = 1.05;
@@ -173,6 +196,12 @@ function launchBall() {
 function resetBall() {
   Matter.Body.setPosition(ball, {x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2,});
   Matter.Body.setVelocity(ball, { x: 0, y: 0 })
+  if (document.getElementById("hardcoreBtn").innerHTML == "ON" && paddleL.height > 50) {
+    PADDLE_HEIGHT = PADDLE_HEIGHT * 0.9;
+    paddleL.height = PADDLE_HEIGHT;
+    Matter.Body.scale(paddleR, 1, 0.9);
+    Matter.Body.scale(paddleL, 1, 0.9);
+  }
 }
 
 function gestionBallVelocity() {
@@ -203,17 +232,17 @@ document.body.addEventListener("keyup", function (e) {
 
 function updateMovePaddle() {
   if (keys[38])
-    if (paddleR.position.y > (PADDLE_LENGHT / 2) + 22)
+    if (paddleR.position.y > (PADDLE_HEIGHT / 2) + 22)
       Matter.Body.translate(paddleR, { x: 0, y: -PAD_SPEED});
   if (keys[40])
-    if (paddleR.position.y < (GAME_HEIGHT - (PADDLE_LENGHT / 2)) - 22)
+    if (paddleR.position.y < (GAME_HEIGHT - (PADDLE_HEIGHT / 2)) - 22)
       Matter.Body.translate(paddleR, { x: 0, y: PAD_SPEED });
 
   if (keys[65])
-    if (paddleL.position.y < (GAME_HEIGHT - (PADDLE_LENGHT / 2)) - 22)
+    if (paddleL.position.y < (GAME_HEIGHT - (PADDLE_HEIGHT / 2)) - 22)
       Matter.Body.translate(paddleL, { x: 0, y: PAD_SPEED });
   if (keys[81])
-    if (paddleL.position.y > (PADDLE_LENGHT / 2) + 22)
+    if (paddleL.position.y > (PADDLE_HEIGHT / 2) + 22)
       Matter.Body.translate(paddleL, { x: 0, y: -PAD_SPEED });
 }
 
@@ -249,4 +278,10 @@ function randomNumberInterval(min, max) {
   if (x == 0)
     return randomNumberInterval(min, max);
   return x;
+}
+
+//////////
+
+function onbuttonclick() {
+  console.log("oui!")
 }
