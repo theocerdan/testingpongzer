@@ -88,14 +88,14 @@ var wallT = Bodies.rectangle(0, 0, GAME_WIDTH * 2, WALL_THICKNESS, {
   isStatic: true,
   label: "WallT",
   render: {
-    fillStyle: "red",
+    fillStyle: "black",
   }
 });
 var wallB = Bodies.rectangle(0, GAME_HEIGHT, GAME_WIDTH * 2, WALL_THICKNESS, { 
   isStatic: true, 
   label: "WallB",
   render: {
-    fillStyle: "red",
+    fillStyle: "black",
   }
 });
 
