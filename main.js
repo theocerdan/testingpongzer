@@ -64,6 +64,7 @@ Render.run(render);
 let ball;
 var currentScoreLeft = 0;
 var currentScoreRight = 0;
+var compteurBallWall = 0;
 var scorer = 1;
 var keys = [];
 
@@ -99,6 +100,7 @@ var wallB = Bodies.rectangle(0, GAME_HEIGHT, GAME_WIDTH * 2, WALL_THICKNESS, {
 });
 
 /// ADD BODIES TO THE WORLD ///
+
 Composite.add(engine.world, [paddleL, paddleR, wallT, wallB]);
 
 /// CREATE AND RUN THE RUNNER ///
@@ -113,6 +115,7 @@ initBall();
 setInterval(function () {
   updateMovePaddle();
   if (ball != undefined) {
+    gestionBallVelocity();
     gestionCollisions();
     gestionScore();
     Engine.update(engine, 1000 / 120);
@@ -135,7 +138,7 @@ function gestionCollisions() {
         calculNewVelocityCollisions();
       }, 1000 / 120)
     }
-  });
+});
 }
 
 function calculNewVelocityCollisions() {
@@ -154,7 +157,7 @@ function initBall() {
       fillStyle: "white"
     }
   });
-  b.restitution = 1.09;
+  b.restitution = 1.05;
   b.inertia = Infinity;
   b.friction = 0;
   b.frictionAir = 0;
@@ -165,13 +168,31 @@ function initBall() {
 }
 
 function launchBall() {
-  Matter.Body.setVelocity(ball, { x: 3 * scorer, y: randomNumberInterval(0, 5) })
+  Matter.Body.setVelocity(ball, { x: 3 * scorer, y: randomNumberInterval(-3, 3) })
 }
 
 function resetBall() {
   Matter.Body.setPosition(ball, {x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2,});
-  Matter.Body.setVelocity(ball, { x: 0, y:0 })
+  Matter.Body.setVelocity(ball, { x: 0, y: 0 })
 }
+
+function gestionBallVelocity() {
+  if (ball.velocity.y >= 3.5 ) {
+    var ballVelocityX = ball.velocity.x
+    Matter.Body.setVelocity(ball, { x: ballVelocityX, y: 3.5 })
+  } else if (ball.velocity.y <= -3.5) {
+    var ballVelocityX = ball.velocity.x
+    Matter.Body.setVelocity(ball, { x: ballVelocityX, y: -3.5 })
+  }
+  if (ball.velocity.x <= 2 && ball.velocity.x > 0) {
+    var ballVelocityY = ball.velocity.y
+    Matter.Body.setVelocity(ball, { x: 2, y: ballVelocityY })
+  } else if (ball.velocity.x >= -2 && ball.velocity.x < 0) {
+    var ballVelocityY = ball.velocity.y
+    Matter.Body.setVelocity(ball, { x: -2, y: ballVelocityY })
+  }
+}
+
 
 /// KEY MANAGEMENT ///
 
@@ -211,7 +232,7 @@ function gestionScore() {
     scorer = 1;
   if (ball.position.x < 0 || ball.position.x > GAME_WIDTH) {
     updateScore();
-    resetBall()
+    resetBall();
   }
 }
 
