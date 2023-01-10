@@ -64,9 +64,9 @@ Render.run(render);
 let ball;
 var currentScoreLeft = 0;
 var currentScoreRight = 0;
-var compteurBallWall = 0;
 var scorer = 1;
 var keys = [];
+var paddleMovement = [];
 
 /// CREATION OF ALL BODIES ///
 
@@ -81,21 +81,21 @@ var paddleR = Bodies.rectangle(GAME_WIDTH - 20, GAME_HEIGHT / 2, 20, PADDLE_LENG
   isStatic: true,
   label: "PaddleRight",
   render: {
-    fillStyle: "white"
+    fillStyle: "white",
   }
 });
 var wallT = Bodies.rectangle(0, 0, GAME_WIDTH * 2, WALL_THICKNESS, {
   isStatic: true,
   label: "WallT",
   render: {
-    fillStyle: "black",
+    fillStyle: "red",
   }
 });
 var wallB = Bodies.rectangle(0, GAME_HEIGHT, GAME_WIDTH * 2, WALL_THICKNESS, { 
   isStatic: true, 
   label: "WallB",
   render: {
-    fillStyle: "black",
+    fillStyle: "red",
   }
 });
 
@@ -193,7 +193,6 @@ function gestionBallVelocity() {
   }
 }
 
-
 /// KEY MANAGEMENT ///
 
 document.body.addEventListener("keydown", function (e) {
@@ -205,16 +204,17 @@ document.body.addEventListener("keyup", function (e) {
 
 function updateMovePaddle() {
   if (keys[38])
-    if (paddleR.position.y > 80)
+    if (paddleR.position.y > 95)
       Matter.Body.translate(paddleR, { x: 0, y: -PAD_SPEED});
   if (keys[40])
-    if (paddleR.position.y < (GAME_HEIGHT - (PADDLE_LENGHT / 2)))
+    if (paddleR.position.y < (GAME_HEIGHT - (PADDLE_LENGHT / 2)) - 20)
       Matter.Body.translate(paddleR, { x: 0, y: PAD_SPEED });
+
   if (keys[65])
-    if (paddleL.position.y < (GAME_HEIGHT - (PADDLE_LENGHT / 2)))
+    if (paddleL.position.y < (GAME_HEIGHT - (PADDLE_LENGHT / 2)) - 20)
       Matter.Body.translate(paddleL, { x: 0, y: PAD_SPEED });
   if (keys[81])
-    if (paddleL.position.y > 80)
+    if (paddleL.position.y > 95)
       Matter.Body.translate(paddleL, { x: 0, y: -PAD_SPEED });
 }
 
