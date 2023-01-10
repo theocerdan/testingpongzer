@@ -21,7 +21,7 @@ const GAME_HEIGHT = 650;
 const GAME_WIDTH = 850;
 const BALL_RADIUS = 15;
 const WALL_THICKNESS = 20;
-const PADDLE_HEIGHT = 150;
+var PADDLE_HEIGHT = 150;
 const PADDLE_WIDTH = 20;
 
 /// RENDERER CREATION ///
@@ -178,7 +178,7 @@ function resetBall() {
   Matter.Body.setPosition(ball, {x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2,});
   Matter.Body.setVelocity(ball, { x: 0, y: 0 })
   if (paddleL.height > 50) {
-    paddleL.height = paddleL.height * 0.9
+    PADDLE_HEIGHT = PADDLE_HEIGHT * 0.9;
     Matter.Body.scale(paddleR, 1, 0.9);
     Matter.Body.scale(paddleL, 1, 0.9);
   }
